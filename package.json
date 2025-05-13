@@ -1,0 +1,43 @@
+{
+  "name": "untitled3",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "predeploy": "npm run build",
+    "deploy": "gh-pages -d dist",
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "predeploy": "npm run build",
+    "deploy": "gh-pages -d dist",
+    "test-deploy": "vite build && gh-pages -d dist && ssh %LKC% \"cd ~/LKC-Frontend-Test-Dist/ && git pull --rebase\""
+  },
+  "dependencies": {
+    "@mdi/font": "^7.4.47",
+    "@tailwindcss/vite": "^4.0.17",
+    "@tiptap/core": "^2.11.3",
+    "@tiptap/extension-color": "^2.11.3",
+    "@tiptap/extension-image": "^2.11.3",
+    "@tiptap/extension-text-style": "^2.11.3",
+    "@tiptap/starter-kit": "^2.11.3",
+    "@tiptap/vue-3": "^2.11.3",
+    "axios": "^1.7.9",
+    "konva": "^9.3.18",
+    "pinia": "^3.0.1",
+    "sweetalert2": "^11.17.2",
+    "vue": "^3.5.13",
+    "vue-konva": "^3.2.0",
+    "vue-router": "^4.5.0",
+    "vue3-google-login": "^2.0.33"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-vue": "^5.2.1",
+    "gh-pages": "^6.3.0",
+    "sass-embedded": "^1.83.4",
+    "vite": "^6.0.11",
+    "vite-plugin-vue-devtools": "^7.7.0",
+    "vite-plugin-vuetify": "^2.1.0",
+    "vuetify": "^3.7.11"
+  }
+}
