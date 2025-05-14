@@ -53,7 +53,6 @@ const avatarSource = computed(() => {
 });
 
 
-
 const logoutCallback = async () => {
   await Auth.logout();
   await router.push("/")
@@ -64,7 +63,7 @@ const menuItems = [
   {title: "Logout", icon: "mdi-logout", callback: logoutCallback},
 ]
 
-const fetchUser = async() => {
+const fetchUser = async () => {
   currentUser.value = await User.me()
 }
 
@@ -94,19 +93,19 @@ const goToRegister = async () => {
           <router-link to="/" class="nav-link">LKC</router-link>
         </v-card-title>
 
-<!--        &lt;!&ndash; Посилання на сторінки &ndash;&gt;-->
-<!--        <div class="nav-links">-->
-<!--          <router-link to="/menu" class="nav-link">Main</router-link>-->
-<!--          <router-link to="/signup" class="nav-link">SignUp</router-link>-->
-<!--          <router-link to="/register" class="nav-link">Register</router-link>-->
-<!--          <router-link to="/help" class="nav-link">Help</router-link>-->
+        <!--        &lt;!&ndash; Посилання на сторінки &ndash;&gt;-->
+        <!--        <div class="nav-links">-->
+        <!--          <router-link to="/menu" class="nav-link">Main</router-link>-->
+        <!--          <router-link to="/signup" class="nav-link">SignUp</router-link>-->
+        <!--          <router-link to="/register" class="nav-link">Register</router-link>-->
+        <!--          <router-link to="/help" class="nav-link">Help</router-link>-->
         <div v-if="currentUser" class="nav-links">
-        <router-link to="/files" class="nav-link">My Projects</router-link>
+          <router-link to="/files" class="nav-link">My Projects</router-link>
         </div>
 
 
         <div v-if="currentUser" class="user-info">
-<!--          <p>{{ currentUser.name }}</p>-->
+          <!--          <p>{{ currentUser.name }}</p>-->
 
           <v-btn
               variant="plain"
@@ -160,7 +159,7 @@ const goToRegister = async () => {
               rounded
               @click="goToSignUp"
           >
-            Sign Up
+            Sign In
           </v-btn>
 
           <v-btn
@@ -222,13 +221,15 @@ const goToRegister = async () => {
   align-items: center;
   gap: 8px;
 }
+
 .help-btn {
   background-color: transparent;
   box-shadow: none;
 }
+
 .custom-avatar-text {
   font-size: 18px;
   font-weight: 500;
- }
+}
 
 </style>

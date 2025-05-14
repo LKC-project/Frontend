@@ -19,7 +19,7 @@
             rounded
             @click="goToSignUp"
         >
-          Sign Up
+          Sign In
         </v-btn>
 
         <v-btn
@@ -35,7 +35,7 @@
         </v-btn>
       </template>
     </v-card-item>
-    </v-card>
+  </v-card>
 
   <v-parallax
       height="500"
@@ -85,11 +85,11 @@
                 height="200"
                 class="mb-2"
             ></v-img>
-<!--            <div class="pdf-preview pa-2 d-flex align-center">-->
-<!--              <v-icon color="red" class="mr-2">mdi-file-pdf-box</v-icon>-->
-<!--              <span class="text-body-2">Retouched-photos.pdf</span>-->
-<!--              <span class="text-caption text-grey ml-auto">8.6 / 12.5 MB</span>-->
-<!--            </div>-->
+            <!--            <div class="pdf-preview pa-2 d-flex align-center">-->
+            <!--              <v-icon color="red" class="mr-2">mdi-file-pdf-box</v-icon>-->
+            <!--              <span class="text-body-2">Retouched-photos.pdf</span>-->
+            <!--              <span class="text-caption text-grey ml-auto">8.6 / 12.5 MB</span>-->
+            <!--            </div>-->
           </v-card>
           <v-card flat class="feature-preview" v-else-if="index === 2">
             <v-img
@@ -138,12 +138,12 @@
             {{ category.title }}
           </h2>
 
-<!--          <v-chip-->
-<!--              class="category-chip mt-2 mb-6"-->
-<!--              variant="text"-->
-<!--          >-->
-<!--            {{ category.name }}-->
-<!--          </v-chip>-->
+          <!--          <v-chip-->
+          <!--              class="category-chip mt-2 mb-6"-->
+          <!--              variant="text"-->
+          <!--          >-->
+          <!--            {{ category.name }}-->
+          <!--          </v-chip>-->
 
           <div class="mt-6 mb-8">
             <v-btn

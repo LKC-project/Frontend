@@ -30,7 +30,7 @@ onMounted(() => {
   })
   window.google.accounts.id.renderButton(
       document.getElementById("google-signin-btn"),
-      { theme: "outline", size: "large" } 
+      {theme: "outline", size: "large"}
   )
 })
 
@@ -44,7 +44,7 @@ const rules = {
   required: v => !!v || 'This field is required',
 }
 
-const goToLogin = () => router.push('/login')
+const goToSignUp = () => router.push('/signup')
 
 const registerChain = async () => {
   try {
@@ -74,7 +74,9 @@ const registerChain = async () => {
     })
 
     await router.push('/files')
-    setTimeout(() => {window.location.reload()}, 100)
+    setTimeout(() => {
+      window.location.reload()
+    }, 100)
 
   } catch (error) {
     Swal.fire({
@@ -102,7 +104,7 @@ const submitForm = () => {
 const callback = async (response) => {
   try {
     isLoading.value = true
-    await Auth.google({ credential: response.credential })
+    await Auth.google({credential: response.credential})
 
     await Swal.fire({
       icon: 'success',
@@ -182,11 +184,11 @@ const callback = async (response) => {
         <v-divider>or</v-divider>
 
         <div class="google-login-container">
-          <GoogleLogin :callback="callback" />
+          <GoogleLogin :callback="callback"/>
         </div>
 
         <v-card-actions>
-          <v-btn variant="text" @click="goToSignUp">Sign Up</v-btn>
+          <v-btn variant="text" @click="goToSignUp">Sign In</v-btn>
           <v-spacer></v-spacer>
           <v-btn
               :loading="isLoading"

@@ -29,7 +29,7 @@ onMounted(() => {
   })
   window.google.accounts.id.renderButton(
       document.getElementById("google-signin-btn"),
-      { theme: "outline", size: "large" } 
+      {theme: "outline", size: "large"}
   )
 })
 
@@ -60,7 +60,9 @@ const submitForm = () => {
       showConfirmButton: false
     }).then(() => {
       router.push('/files');
-      setTimeout(() => {window.location.reload()}, 100)
+      setTimeout(() => {
+        window.location.reload()
+      }, 100)
     })
   }).catch(error => {
     Swal.fire({
@@ -76,7 +78,7 @@ const submitForm = () => {
 const callback = async (response) => {
   try {
     isLoading.value = true
-    await Auth.google({ credential: response.credential });
+    await Auth.google({credential: response.credential});
 
     Swal.fire({
       icon: 'success',
@@ -86,7 +88,9 @@ const callback = async (response) => {
       showConfirmButton: false
     }).then(() => {
       router.push('/files');
-      setTimeout(() => {window.location.reload()}, 100)
+      setTimeout(() => {
+        window.location.reload()
+      }, 100)
     })
   } catch (error) {
     Swal.fire({
@@ -110,7 +114,7 @@ const callback = async (response) => {
       <v-card class="signup-card">
         <v-toolbar class="signup-toolbar" color="indigo-lighten-1" dark flat>
           <v-card-title class="text-h6 font-weight-regular">
-            Sign up
+            Sign in
           </v-card-title>
         </v-toolbar>
 
@@ -137,7 +141,7 @@ const callback = async (response) => {
         <v-divider>or</v-divider>
 
         <div class="google-login-container">
-          <GoogleLogin :callback="callback" />
+          <GoogleLogin :callback="callback"/>
         </div>
 
         <v-card-actions>
