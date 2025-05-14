@@ -9,7 +9,7 @@ export function exportBoardToLKC(stageInstance) {
     try {
       const data = {
         metadata: {
-          title: 'Моя борда',
+          title: 'Board',
           createdAt: new Date().toISOString(),
         },
         snapshot: stageInstance.serialize(),

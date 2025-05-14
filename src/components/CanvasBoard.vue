@@ -2,19 +2,22 @@
 import {onBeforeUnmount, onMounted, onUnmounted, ref} from "vue";
 import Konva from "konva";
 import * as API from "../api";
-import { exportBoardToLKC } from '@/composables/useBoardFile'
-import { VTooltip, VBtn, VIcon } from 'vuetify/components'
-import { instance } from "@/api/base.js";
+import {exportBoardToLKC, importBoardFromLKC} from '@/composables/useBoardFile'
+import {VTooltip, VBtn, VIcon} from 'vuetify/components'
 import ChatAi from '@/components/ChatAI.vue';
+import {GoogleAuth, GooglePicker} from "@/utils/google_picker.js";
 
 const props = defineProps({
   boardID: String,
   getContextMethod: Function,
 });
 
+const snackbar = ref(false)
+const snackbarFileName = ref("")
+
 const noteSceneFunc = (context, shape) => {
   context.fillStyle = shape.attrs._bgColor
-  context.fillRect(0,0,shape.width(),shape.height())
+  context.fillRect(0, 0, shape.width(), shape.height())
   shape._sceneFunc(context)
 }
 
@@ -31,9 +34,9 @@ class Stage {
     this.autoSaveInterval = null;
     this.lastSavedData = null;
     this.isSaving = false;
-    this.saveIntervalMs = saveIntervalMs; 
-    this.projectId = projectId; 
-    this.api = api; 
+    this.saveIntervalMs = saveIntervalMs;
+    this.projectId = projectId;
+    this.api = api;
 
     this.onResize = () => {
       if (!this.stageContainerRef || !this.stageContainerRef.value) return;
@@ -56,7 +59,7 @@ class Stage {
 
       this.stageContainerResizeObserver = new ResizeObserver(this.onResize);
       this.stageContainerResizeObserver.observe(stageContainerRef.value);
-      
+
       const boundSaveSnapshot = this.saveSnapshot.bind(this);
       this.stage.on("mousedown", boundSaveSnapshot);
       this.stage.on("mouseup", boundSaveSnapshot);
@@ -71,7 +74,7 @@ class Stage {
       this.stage.add(transformerLayer);
 
       this.onResize();
-    
+
       this.saveSnapshot();
 
       if (this.api && this.projectId) {
@@ -83,7 +86,7 @@ class Stage {
       if (this.stageContainerResizeObserver) {
         this.stageContainerResizeObserver.disconnect();
       }
-      
+
       if (this.stage) {
         this.stage.off("mousedown");
         this.stage.off("mouseup");
@@ -93,7 +96,7 @@ class Stage {
 
     this.getTopLayer = () => {
       if (!this.stage) return null;
-      
+
       const layers = this.stage.getLayers();
       return layers.length >= 2 ? layers[layers.length - 2] : null;
     }
@@ -114,13 +117,13 @@ class Stage {
 
     this.deserialize = (data) => {
       if (!this.transformer || !this.stage) return;
-      
+
       this.transformer.nodes([]);
       const layer = this.getTopLayer();
       if (!layer) return;
 
       layer.destroyChildren();
-      
+
       let snapshot = data;
       if (typeof data === 'string') {
         try {
@@ -208,75 +211,75 @@ class Stage {
       this.historyIndex += 1;
     }
 
-this.startAutoSave = () => {
-  if (this.autoSaveInterval) {
-    this.stopAutoSave();
-  }
+    this.startAutoSave = () => {
+      if (this.autoSaveInterval) {
+        this.stopAutoSave();
+      }
 
-  this.autoSaveInterval = setInterval(() => {
-    this.autoSave();
-  }, this.saveIntervalMs);
-  console.log(`Auto-save started (every ${this.saveIntervalMs / 1000} seconds)`);
-};
+      this.autoSaveInterval = setInterval(() => {
+        this.autoSave();
+      }, this.saveIntervalMs);
+      console.log(`Auto-save started (every ${this.saveIntervalMs / 1000} seconds)`);
+    };
 
-this.stopAutoSave = () => {
-  if (this.autoSaveInterval) {
-    clearInterval(this.autoSaveInterval);
-    this.autoSaveInterval = null;
-    console.log('Auto-save stopped');
-  }
-};
+    this.stopAutoSave = () => {
+      if (this.autoSaveInterval) {
+        clearInterval(this.autoSaveInterval);
+        this.autoSaveInterval = null;
+        console.log('Auto-save stopped');
+      }
+    };
 
-this.showSaveNotification = () => {
-  const notification = document.getElementById('save-notification');
-  if (notification) {
-    notification.classList.remove('hidden');
-    notification.classList.add('visible');
+    this.showSaveNotification = () => {
+      const notification = document.getElementById('save-notification');
+      if (notification) {
+        notification.classList.remove('hidden');
+        notification.classList.add('visible');
 
-    setTimeout(() => {
-      notification.classList.remove('visible');
-      notification.classList.add('hidden');
-    }, 3000);
-  }
-};
+        setTimeout(() => {
+          notification.classList.remove('visible');
+          notification.classList.add('hidden');
+        }, 3000);
+      }
+    };
 
-this.autoSave = async () => {
-  if (this.isSaving || !this.history.length || this.historyIndex < 0 || !this.api) {
-    return;
-  }
+    this.autoSave = async () => {
+      if (this.isSaving || !this.history.length || this.historyIndex < 0 || !this.api) {
+        return;
+      }
 
-  const currentData = this.history[this.historyIndex];
+      const currentData = this.history[this.historyIndex];
 
-  if (this.lastSavedData === currentData) {
-    return;
-  }
+      if (this.lastSavedData === currentData) {
+        return;
+      }
 
-  const contentSize = JSON.stringify(currentData).length;
-  console.log(`Content size: ${contentSize} bytes`);
+      const contentSize = JSON.stringify(currentData).length;
+      console.log(`Content size: ${contentSize} bytes`);
 
-  try {
-    this.isSaving = true;
-    this.triggerSavingIndicator(true);
+      try {
+        this.isSaving = true;
+        this.triggerSavingIndicator(true);
 
-    const contentToSend = typeof currentData === 'string'
-      ? JSON.parse(currentData)
-      : currentData;
+        const contentToSend = typeof currentData === 'string'
+            ? JSON.parse(currentData)
+            : currentData;
 
-    await this.api.update({
-      id: this.projectId,
-      content: contentToSend,
-    });
+        await this.api.update({
+          id: this.projectId,
+          content: contentToSend,
+        });
 
-    this.lastSavedData = currentData;
-    console.log('Save successful');
-    this.showSaveNotification();
-  } catch (error) {
-    console.error('Save error:', error);
-  } finally {
-    this.isSaving = false;
-    this.triggerSavingIndicator(false);
-  }
-};
+        this.lastSavedData = currentData;
+        console.log('Save successful');
+        this.showSaveNotification();
+      } catch (error) {
+        console.error('Save error:', error);
+      } finally {
+        this.isSaving = false;
+        this.triggerSavingIndicator(false);
+      }
+    };
 
     this.triggerSavingIndicator = (isShowing) => {
       const indicator = document.getElementById('saving-indicator');
@@ -296,8 +299,8 @@ onMounted(() => {
   API.Project.get({id: props.boardID}).then((response) => {
     if (response.content !== null) {
       stage.deserialize(response.content)
-      stage.lastSavedData = response.content; 
-      stage.saveSnapshot(); 
+      stage.lastSavedData = response.content;
+      stage.saveSnapshot();
     }
   })
 })
@@ -307,7 +310,7 @@ onUnmounted(() => {
 })
 
 const exportCurrentBoard = () => {
-  exportBoardToLKC(stage); 
+  exportBoardToLKC(stage);
 }
 
 const handleFileUpload = (event) => {
@@ -317,7 +320,6 @@ const handleFileUpload = (event) => {
   }
 }
 // \========================================= STAGE =========================================/
-
 
 
 // /========================================= SIDE MENU =========================================\
@@ -360,7 +362,6 @@ const sideMenu = new SideMenu()
 // \========================================= SIDE MENU =========================================/
 
 
-
 // /========================================= TOOLBAR =========================================\
 
 class ToolbarItem {
@@ -368,13 +369,18 @@ class ToolbarItem {
     this.stage = stage
     this.toolbar = toolbar
 
-    this.onSelect = () => {}
-    this.onDeselect = () => {}
+    this.onSelect = () => {
+    }
+    this.onDeselect = () => {
+    }
   }
 }
 
-class Tool extends ToolbarItem {}
-class Action extends ToolbarItem {}
+class Tool extends ToolbarItem {
+}
+
+class Action extends ToolbarItem {
+}
 
 class Mouse extends Tool {
   constructor(stage, toolbar) {
@@ -397,7 +403,7 @@ class Mouse extends Tool {
     this.selectNode = (e) => {
       this.setStageNodesDraggable(true) // - ?
       this.stage.transformer.enabledAnchors(
-        ['top-left', 'top-right', 'bottom-left', 'bottom-right', 'middle-left', 'middle-right', 'top-center', 'bottom-center']
+          ['top-left', 'top-right', 'bottom-left', 'bottom-right', 'middle-left', 'middle-right', 'top-center', 'bottom-center']
       )
 
       if (e.target instanceof Konva.Stage) {
@@ -482,7 +488,9 @@ class Draw extends Tool {
     }
 
     this.onMouseMove = () => {
-      if (!this.drawing) {return}
+      if (!this.drawing) {
+        return
+      }
 
       const point = this.stage.stage.getPointerPosition();
       this.line.points([...this.line.points(), point.x, point.y]);
@@ -675,9 +683,9 @@ class Load extends Action {
       fileInput.type = 'file';
       fileInput.accept = '.lkc';
       fileInput.style.display = 'none';
-      
+
       document.body.appendChild(fileInput);
-      
+
       fileInput.addEventListener('change', (event) => {
         const file = event.target.files[0];
         if (file) {
@@ -696,13 +704,13 @@ class Load extends Action {
           };
           reader.readAsText(file);
         }
-        
+
         document.body.removeChild(fileInput);
       });
-      
+
       fileInput.click();
     }
-    
+
     this.loadFromLocalStorage = () => {
       const savedData = localStorage.getItem("stage");
       if (savedData) {
@@ -710,6 +718,52 @@ class Load extends Action {
         return true;
       }
       return false;
+    }
+  }
+}
+
+class SaveProjectToGoogleDrive extends Action {
+  constructor(stage, toolbar) {
+    super(stage, toolbar)
+
+    this.onSelect = async () => {
+      const token = await GoogleAuth.google_drive()
+
+      const response = await API.GoogleDrive.uploadProject({
+        access_token: token,
+        project: JSON.stringify({
+          metadata: {
+            title: 'Board',
+            createdAt: new Date().toISOString(),
+          },
+          snapshot: this.stage.serialize(),
+        })
+      })
+
+      snackbarFileName.value = response.file_name
+      snackbar.value = true
+    }
+  }
+}
+
+class LoadProjectFromGoogleDrive extends Action {
+  constructor(stage, toolbar) {
+    super(stage, toolbar);
+
+    this.picker = new GooglePicker()
+
+    this.onSelect = () => {
+      this.picker.show(this.callback)
+    }
+
+    this.onDeselect = () => {
+
+    }
+
+    this.callback = async (data) => {
+      const file = await this.picker.downloadImage(data.file.id)
+
+      this.stage.deserialize(file.snapshot)
     }
   }
 }
@@ -743,18 +797,28 @@ class ToolBar {
       this.stage = stage;
 
       this.tools.value.push(
-        {name: "Mouse", icon: "mdi-cursor-default", handler: new Mouse(this.stage, this)},
-        {name: "Draw", icon: "mdi-draw", handler: new Draw(this.stage, this)},
-        {name: "Eraser", icon: "mdi-eraser", handler: new Eraser(this.stage, this)},
-        // {name: "Eyedropper", icon: "mdi-eyedropper", handler: new Tool(this.stage, this)},
-        {name: "Add Text", icon: "mdi-format-text", handler: new Text(this.stage, this)},
-        {name: "Image", icon: "mdi-image-outline", handler: new UploadImage(this.stage, this)},
-        // {name: "Crop Image", icon: "mdi-crop", handler: new Tool(this.stage, this)},
-        {name: "Note", icon: "mdi-note-outline", handler: new Note(this.stage, this)},
-        {name: "Export", icon: "mdi-content-save-all-outline", handler: new Save(this.stage, this)},
-        {name: "Import", icon: "mdi-file-upload-outline", handler: new Load(this.stage, this)},
-        {name: "Undo", icon: "mdi-undo", handler: new Undo(this.stage, this)},
-        {name: "Redo", icon: "mdi-redo", handler: new Redo(this.stage, this)}
+          {name: "Mouse", icon: "mdi-cursor-default", handler: new Mouse(this.stage, this)},
+          {name: "Draw", icon: "mdi-draw", handler: new Draw(this.stage, this)},
+          {name: "Eraser", icon: "mdi-eraser", handler: new Eraser(this.stage, this)},
+          // {name: "Eyedropper", icon: "mdi-eyedropper", handler: new Tool(this.stage, this)},
+          {name: "Add Text", icon: "mdi-format-text", handler: new Text(this.stage, this)},
+          {name: "Image", icon: "mdi-image-outline", handler: new UploadImage(this.stage, this)},
+          // {name: "Crop Image", icon: "mdi-crop", handler: new Tool(this.stage, this)},
+          {name: "Note", icon: "mdi-note-outline", handler: new Note(this.stage, this)},
+          {name: "Export", icon: "mdi-content-save-all-outline", handler: new Save(this.stage, this)},
+          {name: "Import", icon: "mdi-file-upload-outline", handler: new Load(this.stage, this)},
+          {
+            name: "Export to google drive",
+            icon: "mdi-google-drive",
+            handler: new SaveProjectToGoogleDrive(this.stage, this)
+          },
+          {
+            name: "Import from google drive",
+            icon: "mdi-folder-google-drive",
+            handler: new LoadProjectFromGoogleDrive(this.stage, this)
+          },
+          {name: "Undo", icon: "mdi-undo", handler: new Undo(this.stage, this)},
+          {name: "Redo", icon: "mdi-redo", handler: new Redo(this.stage, this)}
       )
       this.tools.value[this.selectedTool.value].handler.onSelect()
     }
@@ -805,15 +869,15 @@ const getContext = () => {
   console.log('Text nodes:', textNodes);
 
   const texts = textNodes
-    .filter(node => node.attrs._type === 'Text')
-    .map(node => ({
-      name: "",
-      content: node.text()
-    }))
-    .filter(item => item.content.length <= 100); 
+      .filter(node => node.attrs._type === 'Text')
+      .map(node => ({
+        name: "",
+        content: node.text()
+      }))
+      .filter(item => item.content.length <= 100);
 
   console.log('getContext result:', texts);
-  return texts; 
+  return texts;
 };
 
 
@@ -827,7 +891,7 @@ const getContext = () => {
     <v-card class="side-menu-card" v-if="sideMenu.node.value instanceof Konva.Text">
       <v-card-title ref="Title">{{ sideMenu.node.value.attrs._type }}</v-card-title>
       <v-card-text>
-        {{sideMenu.page.update}}
+        {{ sideMenu.page.update }}
         <v-text-field
             label="Текст"
             v-model="sideMenu.page.value.text"
@@ -838,24 +902,24 @@ const getContext = () => {
   </div>
   <!-- \========================================= SIDE MENU =========================================/ -->
 
-<ChatAi v-if="boardID" :projectId="boardID" :getContextMethod="getContext"></ChatAi>
-<div id="save-notification" class="save-notification hidden">Дошка збережена!</div>
+  <ChatAi v-if="boardID" :projectId="boardID" :getContextMethod="getContext"></ChatAi>
+  <div id="save-notification" class="save-notification hidden">Дошка збережена!</div>
 
   <div class="main-container">
     <!-- /========================================= TOOLBAR =========================================\ -->
     <div class="toolbar">
       <v-btn
-        v-for="(tool, index) in toolbar.tools.value" 
-        :key="index"
-        :icon="tool.icon"
-        :variant="toolbar.selectedTool.value === index ? 'tonal' : 'elevated'"
-        :disabled="Object.getPrototypeOf(tool.handler).constructor === Tool"
-        size="small"
-        @click="() => { toolbar.selectTool(index) }"
+          v-for="(tool, index) in toolbar.tools.value"
+          :key="index"
+          :icon="tool.icon"
+          :variant="toolbar.selectedTool.value === index ? 'tonal' : 'elevated'"
+          :disabled="Object.getPrototypeOf(tool.handler).constructor === Tool"
+          size="small"
+          @click="() => { toolbar.selectTool(index) }"
       >
         <v-tooltip
-          :text="tool.name"
-          location="bottom"
+            :text="tool.name"
+            location="bottom"
         >
           <template v-slot:activator="{ props }">
             <v-icon v-bind="props">{{ tool.icon }}</v-icon>
@@ -875,10 +939,19 @@ const getContext = () => {
       </div> -->
       <!-- \========================================= DELETE IT =========================================/ -->
 
-      <v-stage ref="stageRef" />
+      <v-stage ref="stageRef"/>
     </div>
     <!-- \========================================= STAGE =========================================/ -->
   </div>
+
+  <v-snackbar
+      v-model="snackbar"
+      color="#9fa8da"
+      rounded="pill"
+      :timeout="4000"
+  >
+    Проєкт збережений {{ snackbarFileName }}
+  </v-snackbar>
 </template>
 
 <style scoped>
@@ -915,6 +988,7 @@ const getContext = () => {
   background-color: #9FB3DF;
   padding: 0.25rem;
 }
+
 .toolbar button {
   background-color: #ffffff;
   color: #2e2e2e;
@@ -990,5 +1064,6 @@ const getContext = () => {
 .save-notification.hidden {
   opacity: 0;
   pointer-events: none;
+  background-color: #64b667;
 }
 </style>
