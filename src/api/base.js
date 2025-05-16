@@ -1,6 +1,6 @@
 import axios from "axios";
 
 export const instance = axios.create({
-    baseURL: 'https://api.gridium.xyz',
+    baseURL: 'https://api.lkc-board.xyz',
     withCredentials: true
 })
