@@ -379,9 +379,6 @@ class ToolbarItem {
 class Tool extends ToolbarItem {
 }
 
-class Action extends ToolbarItem {
-}
-
 class Mouse extends Tool {
   constructor(stage, toolbar) {
     super(stage, toolbar)

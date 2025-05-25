@@ -72,19 +72,15 @@
         <div class="feature-visual mb-8">
           <v-card flat class="feature-preview" v-if="index === 0">
             <div class="">
-              <v-img
-                  src="public\images\2_1.png"
-                  height="200"
-                  class="mb-2"
-              ></v-img>
+              <v-img src="./images/2_1.png" height="200" class="mb-2"></v-img>
             </div>
           </v-card>
           <v-card flat class="feature-preview" v-else-if="index === 1">
             <v-img
-                src="public\images\1_1.png"
+                src="./images/1_1.png"
                 height="200"
                 class="mb-2"
-            ></v-img>
+            />
             <!--            <div class="pdf-preview pa-2 d-flex align-center">-->
             <!--              <v-icon color="red" class="mr-2">mdi-file-pdf-box</v-icon>-->
             <!--              <span class="text-body-2">Retouched-photos.pdf</span>-->
@@ -93,14 +89,14 @@
           </v-card>
           <v-card flat class="feature-preview" v-else-if="index === 2">
             <v-img
-                src="public\images\2_2.png"
+                src="./images/2_2.png"
                 height="200"
                 class="rounded-lg"
             ></v-img>
           </v-card>
           <v-card flat class="feature-preview" v-else>
             <v-img
-                src="public\images\photo_2025-05-23_10-50-471.jpg"
+                src="./images/photo_2025-05-23_10-50-471.jpg"
                 height="200"
                 class="mobile-preview"
             ></v-img>
