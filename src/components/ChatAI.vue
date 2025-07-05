@@ -55,10 +55,16 @@ const sendMessage = async () => {
   isLoading.value = true;
   error.value = null;
 
+  console.log(history.value)
+
+  console.log(props.getContextMethod())
+
   try {
     const payload = {
       content: text
     };
+
+
 
     if (props.getContextMethod) {
       const context = props.getContextMethod();
@@ -70,7 +76,7 @@ const sendMessage = async () => {
       }
     }
 
-    payload.history = [{ role: 1, content: text }];
+    payload.history = history.value;
 
     console.log('Sending payload:', JSON.stringify(payload, null, 2));
     const response = await instance.post(`/chat/${projectIdNum}/message`, payload);

@@ -1,9 +1,7 @@
 <template>
   <div id="stage-container">
-    <!-- Editor Overlay -->
     <EditorContent class="editor-overlay" />
 
-    <!-- Konva Stage -->
     <v-stage
         ref="stage"
         :config="stageConfig"
@@ -13,16 +11,13 @@
         @dragend="handleDragend"
         @wheel="handleWheel"
     >
-      <!-- Konva Layer -->
       <v-layer ref="layer">
 
-        <!-- Transformer -->
         <v-transformer
             ref="transformer"
             :boundBoxFunc="(oldBox, newBox) => newBox"
         />
 
-        <!-- Group for Rectangles and Text -->
         <v-group
             :config="{
       x: 100,
@@ -30,7 +25,6 @@
       draggable: true
     }"
         >
-          <!-- Rectangle -->
           <v-rect
               ref="textContainer"
               :config="{
@@ -41,7 +35,6 @@
     }"
           />
 
-          <!-- Editable Text -->
           <v-text
               ref="editableText"
               :config="{
@@ -60,7 +53,6 @@
           />
         </v-group>
 
-        <!-- Text Area for Editing -->
         <textarea
             v-if="isEditing"
             ref="textInput"
@@ -69,7 +61,6 @@
             style="position: absolute; top: 210px; left: 110px; width: 180px; height: 80px; resize: none; overflow: hidden;"
         />
 
-        <!-- Rectangles -->
         <v-rect
             v-for="item in rectangles"
             :key="item.id"
@@ -77,7 +68,6 @@
             @transformend="handleTransformEnd"
         />
 
-        <!-- Image Element -->
         <v-image
             v-if="image"
             :config="{
@@ -91,7 +81,6 @@
             @transformend="handleTransformEnd"
         />
 
-        <!-- Konva Stars -->
         <v-star
             v-for="item in list"
             :key="item.id"
@@ -198,13 +187,11 @@ export default {
       const textNode = e.target;
       this.editableTextNode = textNode;
 
-      // Create textarea
       const textarea = document.createElement('textarea');
       const stage = textNode.getStage();
       const container = stage.container();
       container.appendChild(textarea);
 
-      // Position textarea over text
       const textPosition = textNode.absolutePosition();
       const stageBox = stage.container().getBoundingClientRect();
 
@@ -262,21 +249,18 @@ export default {
       }
     },
     handleStageMouseDown(e) {
-      // clicked on stage - clear selection
       if (e.target === e.target.getStage()) {
         this.selectedShapeName = '';
         this.updateTransformer();
         return;
       }
 
-      // clicked on transformer - do nothing
       const clickedOnTransformer =
           e.target.getParent().className === 'Transformer';
       if (clickedOnTransformer) {
         return;
       }
 
-      // find clicked rect by its name
       const name = e.target.name();
       const rect = this.rectangles.find((r) => r.name === name);
       if (rect) {
@@ -299,7 +283,7 @@ export default {
       }
     },
     handleDragstart(e) {
-      this.dragItemId = e.target.id();  // Ensure dragItemId is set from the event
+      this.dragItemId = e.target.id();
 
       if (!this.dragItemId) {
         console.error("No dragItemId found");
@@ -312,11 +296,10 @@ export default {
         return;
       }
 
-      // Move the item to the end of the list to bring it to the top visually (if necessary)
       const index = this.list.indexOf(item);
       if (index > -1) {
-        this.list.splice(index, 1);  // Remove item
-        this.list.push(item);  // Add item at the end of the list
+        this.list.splice(index, 1);
+        this.list.push(item);
       }
     },
     handleDragend(e) {

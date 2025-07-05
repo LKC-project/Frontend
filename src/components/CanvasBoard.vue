@@ -3,7 +3,7 @@ import {onBeforeUnmount, onMounted, onUnmounted, ref} from "vue";
 import Konva from "konva";
 import * as API from "../api";
 import {exportBoardToLKC, importBoardFromLKC} from '@/composables/useBoardFile'
-import {VTooltip, VBtn, VIcon} from 'vuetify/components'
+import { VTooltip, VBtn, VIcon } from 'vuetify/components'
 import ChatAi from '@/components/ChatAI.vue';
 import {GoogleAuth, GooglePicker} from "@/utils/google_picker.js";
 
@@ -17,7 +17,7 @@ const snackbarFileName = ref("")
 
 const noteSceneFunc = (context, shape) => {
   context.fillStyle = shape.attrs._bgColor
-  context.fillRect(0, 0, shape.width(), shape.height())
+  context.fillRect(0,0,shape.width(),shape.height())
   shape._sceneFunc(context)
 }
 
@@ -99,6 +99,15 @@ class Stage {
 
       const layers = this.stage.getLayers();
       return layers.length >= 2 ? layers[layers.length - 2] : null;
+    }
+
+    this.getContext = () => {
+      const layer = this.getTopLayer()
+
+      return layer.children.filter(child => child instanceof Konva.Text).map((child) => ({
+        name: child._id.toString(),
+        content: child.attrs.text
+      }))
     }
 
     this.serialize = () => {
@@ -322,6 +331,7 @@ const handleFileUpload = (event) => {
 // \========================================= STAGE =========================================/
 
 
+
 // /========================================= SIDE MENU =========================================\
 
 class TextProperties {
@@ -362,6 +372,7 @@ const sideMenu = new SideMenu()
 // \========================================= SIDE MENU =========================================/
 
 
+
 // /========================================= TOOLBAR =========================================\
 
 class ToolbarItem {
@@ -369,15 +380,13 @@ class ToolbarItem {
     this.stage = stage
     this.toolbar = toolbar
 
-    this.onSelect = () => {
-    }
-    this.onDeselect = () => {
-    }
+    this.onSelect = () => {}
+    this.onDeselect = () => {}
   }
 }
 
-class Tool extends ToolbarItem {
-}
+class Tool extends ToolbarItem {}
+class Action extends ToolbarItem {}
 
 class Mouse extends Tool {
   constructor(stage, toolbar) {
@@ -874,6 +883,11 @@ const getContext = () => {
       .filter(item => item.content.length <= 100);
 
   console.log('getContext result:', texts);
+
+  console.log(2143215637465542354)
+  console.log(texts)
+  console.log(2143215637465542354)
+
   return texts;
 };
 
@@ -899,7 +913,7 @@ const getContext = () => {
   </div>
   <!-- \========================================= SIDE MENU =========================================/ -->
 
-  <ChatAi v-if="boardID" :projectId="boardID" :getContextMethod="getContext"></ChatAi>
+  <ChatAi v-if="boardID" :projectId="boardID" :getContextMethod="stage.getContext"></ChatAi>
   <div id="save-notification" class="save-notification hidden">Дошка збережена!</div>
 
   <div class="main-container">
